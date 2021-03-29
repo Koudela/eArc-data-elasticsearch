@@ -1,0 +1,30 @@
+{
+    "name": "earc/data-elasticsearch",
+    "description": "eArc - the explicit architecture framework - data elasticsearch component",
+    "type": "library",
+    "license": "MIT",
+    "version": "dev-0.0",
+    "authors": [
+        {
+            "name": "Thomas Koudela",
+            "email": "thomas@koudela.net"
+        }
+    ],
+    "minimum-stability": "dev",
+    "prefer-stable" : true,
+    "require": {
+        "php": "^8.0",
+        "earc/data": "dev-master",
+        "ruflin/elastica": "^7.1"
+    },
+    "autoload": {
+        "psr-4" : {
+            "eArc\\DataElasticsearch\\" : "src/",
+            "eArc\\DataElasticsearchTests\\" : "tests/"
+        }
+    },
+    "require-dev": {
+        "phpunit/phpunit": "*",
+        "symfony/var-dumper": "*"
+    }
+}
