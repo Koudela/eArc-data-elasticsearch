@@ -8,15 +8,8 @@
  * @license http://opensource.org/licenses/MIT MIT License
  */
 
-namespace eArc\DataElasticsearch;
+use eArc\Data\Entity\AbstractEmbeddedEntity;
 
-class ElasticsearchService
+class Permission extends AbstractEmbeddedEntity
 {
-    /**
-     * @param string[]|null $entityClassNames
-     */
-    public function reBuildIndex(array|null $entityClassNames): void
-    {
-        di_get(ElasticsearchDataBridge::class)->reBuildIndex($entityClassNames);
-    }
 }

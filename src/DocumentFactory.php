@@ -15,19 +15,18 @@ use eArc\Data\Collection\Interfaces\CollectionInterface;
 use eArc\Data\Collection\Interfaces\EmbeddedCollectionInterface;
 use eArc\Data\Entity\Interfaces\EmbeddedEntityInterface;
 use eArc\Data\Entity\Interfaces\EntityInterface;
-use Elastica\Document;
 use ReflectionClass;
 
 class DocumentFactory
 {
-    public function build(EntityInterface $entity): Document
+    public function build(EntityInterface $entity): array
     {
-        $document = new Document($entity::class.'::'.$entity->getPrimaryKey());
-        $data = ['~primaryKey' => $entity->getPrimaryKey()];
-        $this->generateEntityData([], $entity, $data, '');
-        $document->setData($data);
-dump($document);
-        return $document;
+        $documentBody = [
+            '_timestamp' => (new DateTime)->format('c'),
+        ];
+        $this->generateEntityData([], $entity, $documentBody, '');
+
+        return $documentBody;
     }
 
     /**
@@ -43,20 +42,31 @@ dump($document);
                 $this->addValue($data, $name, $val);
             }
         } elseif ($value instanceof DateTime) {
-            $this->addValue($data, $name, $value->format('Y-m-d').'T'.$value->format('H:i:s'));
+            $this->addValue($data, $name, $value->format('c'));
         } elseif (is_object($value)) {
             if ($value instanceof EmbeddedEntityInterface) {
                 if (!in_array($value, $parents)) {
-                    $this->generateEntityData(array_merge($parents, [$value]), $value, $data, $name.'.');
+                    $data[$name] = [];
+                    $this->generateEntityData(array_merge($parents, [$value]), $value, $data[$name], '');
                 }
             } elseif ($value instanceof CollectionInterface) {
-                $this->addValue($data, $name.'.~entityName', $value->getEntityName());
-                $this->addValue($data, $name.'.~primaryKeys', $value->getPrimaryKeys());
+                $data[$name] = [];
+                $this->addValue($data[$name], '_entityName', $value->getEntityName());
+                $this->addValue($data[$name], '_items', $value->getPrimaryKeys());
             } elseif ($value instanceof EmbeddedCollectionInterface) {
-                $this->addValue($data, $name.'.~entityName', $value->getEntityName());
-                /** @var EmbeddedEntityInterface $item */
-                foreach ($value->asArray() as $item) {
-                    $this->generateEntityData($parents, $item, $data, $name.'.~items.');
+                $data[$name] = [];
+                $this->addValue($data[$name], '_entityName', $value->getEntityName());
+                if (!in_array($value, $parents)) {
+                    $data[$name]['_items'] = [];
+                    $parents = array_merge($parents, [$value]);
+                    /** @var EmbeddedEntityInterface $item */
+                    foreach ($value->asArray() as $item) {
+                        if (!in_array($item, $parents)) {
+                            $itemData = [];
+                            $this->generateEntityData($parents, $item, $itemData, '');
+                            $data[$name]['_items'][] = $itemData;
+                        }
+                    }
                 }
             }
         } else {
@@ -70,7 +80,7 @@ dump($document);
             $data[$name] = [];
         }
 
-        $data[$name] = (string) $value;
+        $data[$name][] = $value;
     }
 
     /**

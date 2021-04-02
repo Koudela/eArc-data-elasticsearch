@@ -15,7 +15,7 @@
     "require": {
         "php": "^8.0",
         "earc/data": "dev-master",
-        "ruflin/elastica": "^7.1"
+        "elasticsearch/elasticsearch": "^7.12"
     },
     "autoload": {
         "psr-4" : {

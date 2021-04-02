@@ -12,9 +12,9 @@ namespace eArc\DataElasticsearch;
 
 interface ParameterInterface
 {
-    /** @link https://elastica-docs.readthedocs.io/en/latest/client.html */
-    const ELASTICA_CLIENT_CONFIG = 'earc.data_elasticsearch.elastica_client_config'; // default [host => 'localhost', post => 9200]
-    const INDEX_NAME = 'earc.data_elasticsearch.index_name'; // default 'earc-data'
+    /** @link https://www.elastic.co/guide/en/elasticsearch/client/php-api/current/connceting.html#auth-http */
+    const CLIENT_HOSTS = 'earc.data_elasticsearch.client_hosts'; // default ['http://localhost:9200']
+    const INDEX_PREFIX = 'earc.data_elasticsearch.index_prefix'; // default 'earc-data'
     const WHITELIST = 'earc.data_elasticsearch.whitelist'; // default []
     const BLACKLIST = 'earc.data_elasticsearch.blacklist'; // default []
 }
