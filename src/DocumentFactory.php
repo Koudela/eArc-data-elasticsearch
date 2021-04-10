@@ -44,16 +44,7 @@ class DocumentFactory
         } elseif ($value instanceof DateTime) {
             $this->addValue($data, $name, $value->format('c'));
         } elseif (is_object($value)) {
-            if ($value instanceof EmbeddedEntityInterface) {
-                if (!in_array($value, $parents)) {
-                    $data[$name] = [];
-                    $this->generateEntityData(array_merge($parents, [$value]), $value, $data[$name], '');
-                }
-            } elseif ($value instanceof CollectionInterface) {
-                $data[$name] = [];
-                $this->addValue($data[$name], '_entityName', $value->getEntityName());
-                $this->addValue($data[$name], '_items', $value->getPrimaryKeys());
-            } elseif ($value instanceof EmbeddedCollectionInterface) {
+            if ($value instanceof EmbeddedCollectionInterface) {
                 $data[$name] = [];
                 $this->addValue($data[$name], '_entityName', $value->getEntityName());
                 if (!in_array($value, $parents)) {
@@ -67,6 +58,11 @@ class DocumentFactory
                             $data[$name]['_items'][] = $itemData;
                         }
                     }
+                }
+            } elseif ($value instanceof EmbeddedEntityInterface) {
+                if (!in_array($value, $parents)) {
+                    $data[$name] = [];
+                    $this->generateEntityData(array_merge($parents, [$value]), $value, $data[$name], '');
                 }
             }
         } else {
@@ -85,11 +81,11 @@ class DocumentFactory
 
     /**
      * @param array<EntityInterface|EmbeddedEntityInterface|CollectionInterface|EmbeddedCollectionInterface> $parents
-     * @param EmbeddedEntityInterface|EntityInterface $entity
+     * @param EmbeddedEntityInterface|EntityInterface|CollectionInterface $entity
      * @param array $data
      * @param string $path
      */
-    protected function generateEntityData(array $parents, EmbeddedEntityInterface|EntityInterface $entity, array &$data, string $path)
+    protected function generateEntityData(array $parents, EmbeddedEntityInterface|EntityInterface|CollectionInterface $entity, array &$data, string $path)
     {
         $reflectionClass = new ReflectionClass($entity);
         do {

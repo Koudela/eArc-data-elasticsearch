@@ -53,9 +53,14 @@ class IndexService
     public function search(string $fQCN, array $body): array
     {
         return $this->client->search([
-            "index" => $this->getIndexName($fQCN),
-            "body" => $body,
+            'index' => $this->getIndexName($fQCN),
+            'body' => $body,
         ]);
+    }
+
+    public function refreshIndex(string $fQCN): void
+    {
+        $this->client->indices()->refresh(['index' => $this->getIndexName($fQCN)]);
     }
 
     public function deleteIndex(string $fQCN): void
@@ -83,17 +88,18 @@ class IndexService
     {
         foreach ($entityClassNames as $fQCN) {
             $this->deleteIndex($fQCN);
-            $this->initIndex($fQCN);
-
             $entities = data_find_entities($fQCN, []);
+            $this->initIndex($fQCN);
 
             foreach ($entities as $entity) {
                 $this->addEntity($entity);
             }
+
+            $this->refreshIndex($fQCN);
         }
     }
 
-    protected function getIndexName(string $fQCN): string
+    public function getIndexName(string $fQCN): string
     {
         return $this->indexPrefix.'-'.strtolower(str_replace('\\', '-', $fQCN));
     }

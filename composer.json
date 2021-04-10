@@ -3,7 +3,7 @@
     "description": "eArc - the explicit architecture framework - data elasticsearch component",
     "type": "library",
     "license": "MIT",
-    "version": "dev-0.0",
+    "version": "0.0",
     "authors": [
         {
             "name": "Thomas Koudela",
@@ -14,7 +14,7 @@
     "prefer-stable" : true,
     "require": {
         "php": "^8.0",
-        "earc/data": "dev-master",
+        "earc/data": "^0.0",
         "elasticsearch/elasticsearch": "^7.12"
     },
     "autoload": {
@@ -25,6 +25,7 @@
     },
     "require-dev": {
         "phpunit/phpunit": "*",
-        "symfony/var-dumper": "*"
+        "symfony/var-dumper": "*",
+        "earc/data-filesystem": "^0.0"
     }
 }

@@ -16,6 +16,7 @@ use eArc\Data\Exceptions\DataException;
 use eArc\Data\Manager\Interfaces\Events\OnFindInterface;
 use eArc\Data\Manager\Interfaces\Events\OnPersistInterface;
 use eArc\Data\Manager\Interfaces\Events\OnRemoveInterface;
+use Elasticsearch\Common\Exceptions\Missing404Exception;
 use Exception;
 
 class ElasticsearchDataBridge implements OnPersistInterface, OnRemoveInterface, OnFindInterface
@@ -101,7 +102,13 @@ class ElasticsearchDataBridge implements OnPersistInterface, OnRemoveInterface, 
             ]]]];
         }
 
-        $response = di_get(IndexService::class)->search($fQCN, $body);
+        try {
+            $response = di_get(IndexService::class)->search($fQCN, $body);
+        } /** @noinspection PhpRedundantCatchClauseInspection */ catch (Missing404Exception $exception) {
+            unset($exception);
+
+            return null;
+        }
 
         $primaryKeys = [];
 
@@ -155,7 +162,7 @@ class ElasticsearchDataBridge implements OnPersistInterface, OnRemoveInterface, 
         return $boolQuery;
     }
 
-    protected function getMustQueryPart(string $key, bool|int|float|string|DateTime|array $value, $prefix = ''): array
+    protected function getMustQueryPart(string $key, bool|int|float|string|DateTime|array|null $value, $prefix = ''): array
     {
         if (substr($key, -7, 7) === '..match') {
             $value = $this->transformDateTime($value);

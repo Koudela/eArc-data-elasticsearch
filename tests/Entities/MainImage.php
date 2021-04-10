@@ -10,19 +10,16 @@
 
 namespace eArc\DataElasticsearchTests\Entities;
 
-use DateTime;
 use eArc\Data\Entity\AbstractEmbeddedEntity;
 
-class Price extends AbstractEmbeddedEntity
+class MainImage extends AbstractEmbeddedEntity
 {
-    public int $price;
-    protected string $currency;
-    private DateTime|null $offerStartDate;
+    protected string $src;
+    protected string $alt;
 
-    public function __construct(int $price, string $currency, DateTime|null $offerStartDate = null)
+    public function __construct(string $src, string $alt)
     {
-        $this->price = $price;
-        $this->currency = $currency;
-        $this->offerStartDate = $offerStartDate;
+        $this->src = $src;
+        $this->alt = $alt;
     }
 }

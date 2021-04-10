@@ -3,6 +3,31 @@
 Elasticsearch-bridge for the [earc/data](https://github.com/Koudela/eArc-data) 
 persistence handler.
 
+## table of contents
+
+- [installation](#installation)
+- [basic usage](#basic-usage)
+    - [bootstrap](#bootstrap)
+    - [initialize index](#initialize-index)
+    - [search](#search)
+    - [enhanced syntax](#enhanced-syntax)
+        - [range](#range)
+        - [match](#match)
+        - [text](#text)
+        - [exists](#exists)
+        - [_id](#_id)
+        - [embedded entity](#embedded-entity)
+        - [embedded entity collection (nested)](#embedded-entity-collection-nested)
+        - [joins](#joins)
+        - [raw query](#raw-query)
+        - [raw search body](#raw-search-body)
+- [advanced usage](#advanced-usage)
+    - [index name](#index-name)
+    - [entity whitelist and blacklist](#entity-whitelist-and-blacklist)
+    - [extend the elasticsearch bridge](#extend-the-elasticsearch-bridge)
+- [releases](#releases)
+    - [release 0.0](#release-00)
+
 ## installation
 
 Install the earc data elasticsearch library via composer.
@@ -15,6 +40,14 @@ $ composer require earc/data-elasticsearch
 
 ### bootstrap
 
+Initialize the earc/data package.
+
+```php
+use eArc\Data\Initializer;
+
+Initializer::init();
+```
+
 If your elasticsearch server is *not* located at `localhost:9200` or you need to
 authenticate, you have to configure it.
 
@@ -24,12 +57,6 @@ use eArc\DataElasticsearch\ParameterInterface;
 $hosts = ['https://user:pass@elasticsearch.my-server.com:32775'];
 
 di_set_param(ParameterInterface::CLIENT_HOSTS, $hosts);
-```
-
-Initialize the earc/data package.
-
-```php
-BootstrapEArcData::init();
 ```
 
 Then register the earc/data-elasticsearch bridge.
@@ -60,7 +87,7 @@ di_get(IndexService::class)->rebuildIndex([
 ]);
 ```
 
-This has to be done only once.
+This has to be done only once. New entities and updates are indexed automatically.
 
 ### search
 
@@ -68,7 +95,7 @@ To search is very straight forward.
 
 ```php
 $primaryKeys = data_find(MyUserEntity::class, ['name' => ['Max', 'Moritz'], 'age' => 21]);
-$userEntities = data_load_stack(MyUserEntity::class, $primaryKeys);
+$userEntities = data_load_batch(MyUserEntity::class, $primaryKeys);
 ```
 
 This would find all entities of the `MyUserEntitiy` class with a `name` property of
@@ -190,6 +217,16 @@ $colors = data_find(Attribute::class, [
 ]);
 ```
 
+This works for one-to-one and many-to-one relations.
+
+If your joined entity uses a collection e.g. the join represents a one-to-many
+or a many-to-many relation, then you have to use the `.items` embedded syntax.
+
+```php
+$colors = data_find(Attribute::class, ['name..match' => ['white']]);
+$colorCategories = data_find(AttributeCategory::class, ['attributes.items' => $colors]);
+```
+
 #### raw query
 
 You can always call upon the raw power of the elasticsearch dsl via the `.raw` postfix.
@@ -239,16 +276,19 @@ use eArc\DataElasticsearch\ParameterInterface;
 di_set_param(ParameterInterface::INDEX_PREFIX, 'my-index-prefix');
 ```
 
-### whitelist and blacklist
+### entity whitelist and blacklist
 
 All entities are indexed by default. This can be changed via whitelisting or
 blacklisting.
 
 ```php
 use eArc\DataElasticsearch\ParameterInterface;
+use eArc\DataElasticsearchTests\Entities\BlacklistedEntity;
 
 di_set_param(ParameterInterface::WHITELIST, [
     // list of entity class names
+    BlacklistedEntity::class => true,
+    // ...
 ]);
 ```
 
@@ -259,6 +299,8 @@ use eArc\DataElasticsearch\ParameterInterface;
 
 di_set_param(ParameterInterface::BLACKLIST, [
     // list of entity class names
+    Attribute::class => true,
+    // ...
 ]);
 ```
 
@@ -281,7 +323,7 @@ Since there are only three classes (`DocumentFactory`, `ElasticsearchDataBridge`
 
 ## releases
 
-### release v0.0
+### release 0.0
 
 * the first official release
 * php ^8.0 support

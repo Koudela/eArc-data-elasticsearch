@@ -3,3 +3,5 @@ composer.phar
 composer.lock
 [tT][oO][dD][oO]*
 [lL][oO][cC][aA][lL]*
+.phpunit.result.cache
+/tests/data
